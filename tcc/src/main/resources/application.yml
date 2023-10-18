@@ -1,0 +1,46 @@
+server:
+  port: 8030
+  tomcat:
+    accept-count: 256
+    max-connections: 20480
+    max-threads: 128
+    min-spare-threads: 32
+
+spring:
+  application:
+    name: igg-tcc-center
+  kafka:
+    bootstrap-servers:
+      - 10.0.3.163:9092
+      - 10.0.3.164:9092
+      - 10.0.3.165:9092
+    producer:
+      acks: all
+      key-serializer:
+        org.apache.kafka.common.serialization.StringSerializer
+      value-serializer:
+        org.apache.kafka.common.serialization.StringSerializer
+      client-id: ${spring.application.name}
+      compression-type: gzip
+      buffer-memory: 67108864
+      batch-size: 16384
+      properties:
+        linger.ms: 1
+
+
+#eureka:
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://igg-report-common:9peNVNHAhn2AwfPb@10.0.3.166:8761/eureka/
+
+igg:
+  db:
+    druid:
+      driver-class-name: com.mysql.jdbc.Driver
+      password: taskmanager
+      username: taskmanager
+      url: jdbc:mysql://10.0.3.166:3306/taskmanager
+      initial-size: 2
+      max-active: 64
