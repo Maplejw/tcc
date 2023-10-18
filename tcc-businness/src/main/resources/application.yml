@@ -1,0 +1,37 @@
+server:
+  port: 8020
+  tomcat:
+    accept-count: 256
+    max-connections: 20480
+    max-threads: 128
+    min-spare-threads: 32
+
+spring:
+  application:
+    name: igg-tcc-business
+  kafka:
+    bootstrap-servers:
+      - 10.0.3.163:9092
+      - 10.0.3.164:9092
+      - 10.0.3.165:9092
+    listener:
+      ack-mode: MANUAL
+    consumer:
+      auto-offset-reset: earliest
+      group-id: igg-tcc-business-product
+      enable-auto-commit: false
+
+igg:
+  db:
+    transaction:
+      expression: execution(* tcc..*.service..*.*(..))
+    druid:
+      driver-class-name: com.mysql.jdbc.Driver
+      password: taskmanager
+      username: taskmanager
+      url: jdbc:mysql://10.0.3.166:3306/taskmanager
+      initial-size: 2
+      max-active: 64
+  tcc:
+    enable: true
+    host: 127.0.0.1:8030
