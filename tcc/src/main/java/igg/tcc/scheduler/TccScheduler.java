@@ -46,19 +46,28 @@ public class TccScheduler {
                 params.put("action_type",tccTransactionModel.getStatus());
             }
             params.put("transaction_no",tccTransactionModel.getTranscationNo());
-            try {
-                kafkaTemplate.send(tccTransactionModel.getTopic(),
-                        tccTransactionModel.getTranscationNo(),
-                        objectMapper.writeValueAsString(params));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
             if(tccTransactionModel.getStatus() == TccActionEnum.Init.getAction()){
-                tccTransactionService.updateTccTransactionSendAndStatus(tccTransactionModel.getTranscationNo(),
-                        TccActionEnum.Cancel.getAction());
+                //防止消息二次发送
+                if(tccTransactionService.updateTccTransactionByTransactionNo(tccTransactionModel.getTranscationNo(),
+                        TccActionEnum.Cancel.getAction(),System.currentTimeMillis()/1000) > 0){
+                    try {
+                        kafkaTemplate.send(tccTransactionModel.getTopic(),
+                                tccTransactionModel.getTranscationNo(),
+                                objectMapper.writeValueAsString(params));
+                    } catch (JsonProcessingException e) {
+                        log.error(e.getMessage(),e);
+                    }
+                }
             }else{
-                tccTransactionService.updateTccTransactionSendStatus(tccTransactionModel.getTranscationNo());
+                try {
+                    kafkaTemplate.send(tccTransactionModel.getTopic(),
+                            tccTransactionModel.getTranscationNo(),
+                            objectMapper.writeValueAsString(params));
+                } catch (JsonProcessingException e) {
+                    log.error(e.getMessage(),e);
+                }
             }
+            tccTransactionService.updateTccTransactionSendStatus(tccTransactionModel.getTranscationNo());
             log.info(tccTransactionModel.getTranscationNo() + ":resend success");
         });
         log.info("scheduler end");

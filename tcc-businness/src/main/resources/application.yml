@@ -24,7 +24,7 @@ spring:
 igg:
   db:
     transaction:
-      expression: execution(* tcc..*.service..*.*(..))
+      expression: execution(* tc222c..*.service..*.*(..))
     druid:
       driver-class-name: com.mysql.jdbc.Driver
       password: taskmanager

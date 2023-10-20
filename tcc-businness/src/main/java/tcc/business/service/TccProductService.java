@@ -4,6 +4,7 @@ import com.igg.boot.framework.autoconfigure.tcc.TccActionEnum;
 import com.igg.boot.framework.jdbc.persistence.condition.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tcc.business.dao.TccProductDao;
 import tcc.business.dao.TccProductRecordDao;
 import tcc.business.model.TccProductRecordModel;
@@ -28,27 +29,34 @@ public class TccProductService {
                 param);
     }
 
-
+    @Transactional
     public void updateProductRollback(String transactionNo,int status){
         Condition condition = Condition.eq("transaction_no",transactionNo);
         List<TccProductRecordModel> tccProductRecordModelList = tccProductRecordDao.query(condition);
-        if (tccProductRecordModelList.size() > 0){
+        if(tccProductRecordModelList.size() <= 0){
+            TccProductRecordModel tccProductRecordModel = new TccProductRecordModel();
+            tccProductRecordModel.setProductId(0l);
+            tccProductRecordModel.setTransactionNo(transactionNo);
+            tccProductRecordModel.setStatus(status);
+            tccProductRecordModel.setStock(0);
+            tccProductRecordDao.save(tccProductRecordModel);
+            return;
+        }
+        //幂等性处理，防止重复
+        if(setProductRecord(transactionNo,status) > 0){
             TccProductRecordModel tccProductRecordModel = tccProductRecordModelList.get(0);
-            if(setProductRecord(transactionNo,status) > 0){
-                Map<String,Object> param = new HashMap<>();
-                param.put("stock",tccProductRecordModel.getStock());
-                param.put("id",tccProductRecordModel.getProductId());
-                tccProductDao.update("stock=-:stock where id=:id",param);
-            }
+            Map<String,Object> param = new HashMap<>();
+            param.put("stock",tccProductRecordModel.getStock());
+            param.put("id",tccProductRecordModel.getProductId());
+            tccProductDao.update("stock=stock-:stock where id=:id",param);
         }
     }
 
-
+    @Transactional
     public boolean updateProduct(StockParam stockParam){
         Map<String,Object> param = new HashMap<>();
         param.put("stock",stockParam.getStock());
         param.put("id",stockParam.getProductId());
-        System.out.println(param.toString());
         int row = tccProductDao.update("stock=stock-:stock where id=:id and stock>=:stock",param);
         if(row > 0){
             TccProductRecordModel tccProductRecordModel = new TccProductRecordModel();

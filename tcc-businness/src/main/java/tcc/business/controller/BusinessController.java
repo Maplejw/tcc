@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestTemplate;
+import tcc.business.exception.StockException;
+import tcc.business.exception.StockExceptionCode;
 import tcc.business.param.StockParam;
 import tcc.business.param.UserParam;
 import tcc.business.service.TccProductService;
@@ -33,7 +35,7 @@ public class BusinessController {
     @GetMapping("/test")
     @RestResponseBody
     @TccTopic(name = "tcc-test-business")
-    public String test() throws IOException {
+    public String test() throws IOException, InterruptedException {
         Map<String,Object> param = new HashMap<>();
         String txNo = TccTranscationNo.getTranscationNo();
         param.put("product_id",1);
@@ -46,6 +48,8 @@ public class BusinessController {
         RestResponse<Boolean> restResponse = objectMapper.readValue(ret,RestResponse.class);
         if(restResponse.getCode() == 0 && restResponse.getData()){
             param.clear();
+            //如果这里代码休眠100秒，而TCC定时任务轮训30S前未处理的事务，就会发送取消，而当休眠时间过了，就会继续执行业务逻辑导致数据不一致
+            //Thread.sleep(3000);
             param.put("user_id",1);
             param.put("credit",5);
             param.put("transaction_no",txNo);
@@ -55,10 +59,10 @@ public class BusinessController {
             if(restResponse.getCode() == 0 && restResponse.getData()){
                 return "hello world";
             }else{
-                throw new RuntimeException("credit error");
+                throw new StockException(StockExceptionCode.CREDIT_NOT_ENOUGH);
             }
         }else{
-            throw new RuntimeException("stock error");
+            throw new StockException(StockExceptionCode.STOCK_NOT_ENOUGH);
         }
     }
 

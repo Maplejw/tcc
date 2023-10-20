@@ -40,6 +40,7 @@ public class TccTransactionController {
     public String notifyPath(@RequestParam Map<String,Object> params){
         try {
             String transactionNo = params.get("transaction_no") + "";
+            log.info("start:"+transactionNo);
             //防止消息二次发送
             if(tccTransactionService.updateTccTransactionByTransactionNo(transactionNo,
                     Integer.parseInt(params.get(
