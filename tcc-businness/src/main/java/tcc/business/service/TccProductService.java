@@ -3,7 +3,9 @@ package tcc.business.service;
 import com.igg.boot.framework.autoconfigure.tcc.TccActionEnum;
 import com.igg.boot.framework.jdbc.persistence.condition.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import tcc.business.dao.TccProductDao;
 import tcc.business.dao.TccProductRecordDao;
@@ -29,21 +31,28 @@ public class TccProductService {
                 param);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateProductRollback(String transactionNo,int status){
         Condition condition = Condition.eq("transaction_no",transactionNo);
         List<TccProductRecordModel> tccProductRecordModelList = tccProductRecordDao.query(condition);
+        boolean duplicateKey = false;
         if(tccProductRecordModelList.size() <= 0){
             TccProductRecordModel tccProductRecordModel = new TccProductRecordModel();
             tccProductRecordModel.setProductId(0l);
             tccProductRecordModel.setTransactionNo(transactionNo);
             tccProductRecordModel.setStatus(status);
             tccProductRecordModel.setStock(0);
-            tccProductRecordDao.save(tccProductRecordModel);
-            return;
+            try{
+                tccProductRecordDao.save(tccProductRecordModel);
+            }catch (DuplicateKeyException e){
+                duplicateKey = true;
+                tccProductRecordModelList = tccProductRecordDao.query(condition);
+            }
+        }else{
+            duplicateKey = true;
         }
         //幂等性处理，防止重复
-        if(setProductRecord(transactionNo,status) > 0){
+        if(duplicateKey && setProductRecord(transactionNo,status) > 0){
             TccProductRecordModel tccProductRecordModel = tccProductRecordModelList.get(0);
             Map<String,Object> param = new HashMap<>();
             param.put("stock",tccProductRecordModel.getStock());
