@@ -1,6 +1,7 @@
 package com.igg.boot.framework.autoconfigure.es;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -107,6 +108,16 @@ public class ElasticsearchAutoconfiguration {
         @Override
         public <T> T mapToObject(String source, Class<T> clazz) {
             return gson.fromJson(source, clazz);
+        }
+
+        @Override
+        public Map<String, Object> mapObject(Object o) {
+            return null;
+        }
+
+        @Override
+        public <T> T readObject(Map<String, Object> map, Class<T> aClass) {
+            return null;
         }
 
     }
