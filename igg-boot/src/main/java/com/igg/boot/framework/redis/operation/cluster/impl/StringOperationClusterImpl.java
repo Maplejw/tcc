@@ -6,6 +6,7 @@ import com.igg.boot.framework.redis.RedisAutoconfiguration;
 import com.igg.boot.framework.redis.operation.StringOperation;
 
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.params.SetParams;
 
 public class StringOperationClusterImpl implements StringOperation {
 	private JedisCluster jedisCluster;
@@ -60,7 +61,8 @@ public class StringOperationClusterImpl implements StringOperation {
 
 	@Override
 	public boolean setexnx(String key, String value, int expired) {
-		String code = jedisCluster.set(key, value, RedisAutoconfiguration.NX, RedisAutoconfiguration.EX, expired);
+		SetParams setParams = SetParams.setParams().nx().ex(expired);
+		String code = jedisCluster.set(key, value, setParams);
 		
 		return code != null && code.equals("OK");
 	}

@@ -9,6 +9,7 @@ import com.igg.boot.framework.redis.RedisAutoconfiguration;
 import com.igg.boot.framework.redis.RedisExecute;
 import com.igg.boot.framework.redis.operation.StringOperation;
 import com.igg.boot.framework.redis.operation.StringSingleOperation;
+import redis.clients.jedis.params.SetParams;
 
 public class StringOperationImpl implements StringOperation, StringSingleOperation {
 	private RedisExecute redisExecute;
@@ -64,7 +65,11 @@ public class StringOperationImpl implements StringOperation, StringSingleOperati
 
 	@Override
 	public boolean setexnx(String key, String value, int expired) {
-		String code = redisExecute.execute(jedis -> jedis.set(key, value, RedisAutoconfiguration.NX, RedisAutoconfiguration.EX, expired));
+		String code = redisExecute.execute(jedis -> {
+					SetParams setParams = SetParams.setParams().nx().ex(expired);
+					return jedis.set(key, value, setParams);
+				}
+		);
 		if(code == null) {
 		    return false;
 		}

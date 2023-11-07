@@ -19,6 +19,8 @@ public class Test {
                     URL obj = new URL(url);
                     HttpURLConnection con = (HttpURLConnection) obj.openConnection();
                     con.setRequestMethod("GET");
+                    con.setConnectTimeout(2000);
+                    con.setReadTimeout(2000);
 
                     int responseCode = con.getResponseCode();
                     System.out.println("Response Code : " + responseCode);
@@ -35,7 +37,8 @@ public class Test {
                     //打印结果
                     System.out.println(response.toString());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.out.println(e.getMessage());
+                    //e.printStackTrace();
                 }
             });
         }

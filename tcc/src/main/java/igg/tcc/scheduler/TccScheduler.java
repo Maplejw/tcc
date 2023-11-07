@@ -54,6 +54,8 @@ public class TccScheduler {
                         kafkaTemplate.send(tccTransactionModel.getTopic(),
                                 tccTransactionModel.getTranscationNo(),
                                 objectMapper.writeValueAsString(params));
+                        tccTransactionService.updateTccTransactionSendStatus(tccTransactionModel.getTranscationNo());
+                        log.info(tccTransactionModel.getTranscationNo() + ":resend success");
                     } catch (JsonProcessingException e) {
                         log.error(e.getMessage(),e);
                     }
@@ -63,12 +65,12 @@ public class TccScheduler {
                     kafkaTemplate.send(tccTransactionModel.getTopic(),
                             tccTransactionModel.getTranscationNo(),
                             objectMapper.writeValueAsString(params));
+                    tccTransactionService.updateTccTransactionSendStatus(tccTransactionModel.getTranscationNo());
+                    log.info(tccTransactionModel.getTranscationNo() + ":resend success");
                 } catch (JsonProcessingException e) {
                     log.error(e.getMessage(),e);
                 }
             }
-            tccTransactionService.updateTccTransactionSendStatus(tccTransactionModel.getTranscationNo());
-            log.info(tccTransactionModel.getTranscationNo() + ":resend success");
         });
         log.info("scheduler end");
     }
