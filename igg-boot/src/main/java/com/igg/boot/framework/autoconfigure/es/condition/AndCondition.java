@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.igg.boot.framework.autoconfigure.es.condition.exception.ElastisearchException;
+import com.igg.boot.framework.autoconfigure.es.condition.exception.ElastisearchExceptionCode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -36,6 +38,9 @@ public class AndCondition extends Condition {
 
     public QueryBuilder toQueryBuilder() {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        if(conditionMap.size() <= 0){
+            throw new ElastisearchException(ElastisearchExceptionCode.AND_CONDITION_ERROR);
+        }
         conditionMap.forEach((k, conditionLists) -> {
             conditionLists.forEach(condition -> {
                 if (k.equals(MUST)) {

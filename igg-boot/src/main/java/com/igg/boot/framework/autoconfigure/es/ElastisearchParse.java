@@ -2,6 +2,7 @@ package com.igg.boot.framework.autoconfigure.es;
 
 import java.lang.reflect.Field;
 
+import com.igg.boot.framework.autoconfigure.es.condition.exception.ElastisearchExceptionCode;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import com.igg.boot.framework.autoconfigure.es.condition.exception.ElastisearchException;
@@ -11,7 +12,7 @@ public class ElastisearchParse {
     
     public static Document getDoucment(Class<?> clz) {
         if(!clz.isAnnotationPresent(Document.class)) {
-            throw new ElastisearchException(HttpSystemExceptionCode.ES_ANNOTATION_NOT_FOUND_ERROR);
+            throw new ElastisearchException(ElastisearchExceptionCode.ES_ANNOTATION_NOT_FOUND_ERROR);
         }
         Document document = (Document)clz.getAnnotation(Document.class);
         
@@ -33,7 +34,7 @@ public class ElastisearchParse {
             }
         }
         if(routingName == null) {
-            throw new ElastisearchException(HttpSystemExceptionCode.ES_ANNOTATION_ROUTING_NOT_FOUND_ERROR);
+            throw new ElastisearchException(ElastisearchExceptionCode.ES_ANNOTATION_ROUTING_NOT_FOUND_ERROR);
         }
         
         return routingName + "";

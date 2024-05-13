@@ -3,6 +3,7 @@ package com.igg.boot.framework.autoconfigure.es.condition;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.igg.boot.framework.autoconfigure.es.condition.exception.ElastisearchExceptionCode;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -45,7 +46,7 @@ public class RangeCondition extends Condition {
 	public QueryBuilder toQueryBuilder() {
 		RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(field);
 		if(rangeOperator.size() <= 0) {
-			throw new ElastisearchException(HttpSystemExceptionCode.ES_RANGE_CONDITION);
+			throw new ElastisearchException(ElastisearchExceptionCode.ES_RANGE_CONDITION);
 		}
 		rangeOperator.forEach((operate,value) -> {
 			if(operate.equals(GT)) {
